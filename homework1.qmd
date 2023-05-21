@@ -302,7 +302,7 @@ manufacturer_counts <- joined_data %>%
 
 manufacturer_counts
 
-# By looking at the table able, it looks like in 2013, the distribution of manufacturers over time is verey consistent, with Boeing, Embraer and Airbus being top 3 in this respective order across all the months of 2013.
+# By looking at the table able, it looks like in 2013, the distribution of manufacturers over time is very consistent, with Boeing, Embraer and Airbus being top 3 in this respective order across all the months of 2013.
 ```
 
 ## Problem 6: Use the `flights` and `planes` tables to answer the following questions:
@@ -497,7 +497,7 @@ The age gaps dataset includes "gender" columns, which always contain the values 
 The following is a data dictionary of the variables used
 
 | variable            | class     | description                                                                                             |
-|:--------------------|:----------|:--------------------------------------------------------------------------------------------------------|
+|:-----------|:-----------|:-----------------------------------------------|
 | movie_name          | character | Name of the film                                                                                        |
 | release_year        | integer   | Release year                                                                                            |
 | director            | character | Director of the film                                                                                    |
