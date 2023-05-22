@@ -116,7 +116,14 @@ victims_locationA <- mass_shootings %>%
 
 victims_locationA
 
-# Beause there was an instance of a shooting with over 600 victims, the scale of the boxplot make it hard to visualise the data. I thus remove this specific shooting to be able to have a different scale in the boxplot and visualise the data better
+# Beause there was an instance of a shooting with over 600 victims, the scale of the boxplot make it hard to visualise the data. 
+  
+```
+
+-   Redraw the same plot, but remove the Las Vegas Strip massacre from the dataset.
+
+```{r}
+# I remove Las Vegas Strip massacre to be able to have a different scale in the boxplot and visualise the data better
 # I do this with the filter() function
 victims_locationB <- mass_shootings %>% 
   filter(total_victims < 200) %>% 
@@ -126,13 +133,8 @@ victims_locationB <- mass_shootings %>%
   theme_minimal()
 
 victims_locationB
-  
-```
 
--   Redraw the same plot, but remove the Las Vegas Strip massacre from the dataset.
-
-```{r}
-
+# I can now more easily see which location has a more or less spread out number of victims
 ```
 
 ### More open-ended questions
@@ -142,19 +144,96 @@ Address the following questions. Generate appropriate figures/tables to support 
 -   How many white males with prior signs of mental illness initiated a mass shooting after 2000?
 
 ```{r}
+# I use the filter() functions to create the appropriate data and nrow() function to count the values I wish to count
+white_illness <- mass_shootings %>% 
+  filter(race == "White", male == TRUE, prior_mental_illness == "Yes", year > 2000) %>% 
+  nrow()
 
+white_illness
+
+# There are 22 white males with prior signs of mental illness that initiated a mass shooting after 2000
+
+total_count <- mass_shootings %>% 
+  filter(race == "White", male == TRUE, year > 2000) %>% 
+  nrow()
+
+total_count
+
+22/44*100
+
+# This represents half of the white men that initiated a mass shooting after 2000.
 ```
 
 -   Which month of the year has the most mass shootings? Generate a bar chart sorted in chronological (natural) order (Jan-Feb-Mar- etc) to provide evidence of your answer.
 
 ```{r}
+# I generate a dataset that counts the number of mass shootings per month
+shootings_by_month <- mass_shootings %>%
+  group_by(month) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
 
+shootings_by_month
+
+# The month with the most mass shootings is February, with 13 mass shootings
+# I now create the bar chart, starting by ordering the months chronologically
+month_order <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+month_bar_chart <- shootings_by_month %>% 
+  mutate(month = reorder(month, match(month, month_order))) %>%
+  ggplot(aes(x = month, y = count)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(title = "Mass Shootings per Month", x = "Month", y = "Number of Shootings") +
+  geom_text(aes(label = count), vjust = -0.5)
+
+month_bar_chart  
 ```
 
 -   How does the distribution of mass shooting fatalities differ between White and Black shooters? What about White and Latino shooters?
 
 ```{r}
+# I start by creating approrpiate datasets to look quickly at the data I need
+White_Black_shooters <- mass_shootings %>%
+  filter(race %in% c("White", "Black")) 
+White_Black_shooters
 
+White_Latino_shooters <- mass_shootings %>%
+  filter(race %in% c("White", "Latino"))
+White_Latino_shooters
+
+# I create boxplots to see how spread out the data is
+WB_boxplot <- White_Black_shooters %>% 
+  ggplot(aes(x = race, y = fatalities)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Mass Shooting Fatalities between White and Black shooters", x = "Race", y = "Fatalities")
+
+WB_boxplot
+
+WL_boxplot <- White_Latino_shooters %>% 
+  ggplot(aes(x = race, y = fatalities)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Mass Shooting Fatalities between White and Latino shooters", x = "Race", y = "Fatalities")
+
+WL_boxplot
+
+# I limit the number of fatalities so I can get a better scale to visiualise the data on
+WB_boxplot_scaled <- White_Black_shooters %>% 
+  filter(fatalities <= 30) %>% 
+  ggplot(aes(x = race, y = fatalities)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Mass Shooting Fatalities between White and Black shooters", x = "Race", y = "Fatalities")
+
+WB_boxplot_scaled
+
+WL_boxplot_scaled <- White_Latino_shooters %>% 
+  filter(fatalities <= 30) %>% 
+  ggplot(aes(x = race, y = fatalities)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Mass Shooting Fatalities between White and Latino shooters", x = "Race", y = "Fatalities")
+
+WL_boxplot_scaled
+
+# Now it is easier to understand the data. It looks like fatalities caused by White shooters tend to be more spread out fatalities than both Black and Latino shooters. The median is higher for White shooters than both Black and Latino shooters, and White shooters tend to cause higher fatalities than Black and Latino shooters. 
 ```
 
 ### Very open-ended
@@ -162,13 +241,78 @@ Address the following questions. Generate appropriate figures/tables to support 
 -   Are mass shootings with shooters suffering from mental illness different from mass shootings with no signs of mental illness in the shooter?
 
 ```{r}
+# I look at the percentage of shooters that have a mental illness
+total_prior <- mass_shootings %>% 
+  filter(!is.na(prior_mental_illness)) %>% 
+  nrow()
 
+total_prior
+
+mentally_ill <- mass_shootings %>% 
+  filter(!is.na(prior_mental_illness)) %>% 
+  filter(prior_mental_illness == "Yes") %>% 
+  nrow()
+
+mentally_ill
+
+62/79*100
+
+# About 78% of the mass shootings in the dataset are caused by shooters with a prior mental illness.
+# I create boxplots to show how distributed the data is in terms of fatalities
+Mental_boxplot <- mass_shootings %>% 
+  filter(!is.na(prior_mental_illness)) %>% 
+  group_by(prior_mental_illness) %>% 
+  ggplot(aes(x = prior_mental_illness, y = fatalities)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Mass Shooting Fatalities according to presence of mental illness", x = "Presence of Mental Illness", y = "Fatalities")
+
+Mental_boxplot
+
+# I see that the number of fatalities tends to be higher and more spread out from shooters suffering from mental illness
+
+# I now look at the location type 
+location_shootings_data <- mass_shootings %>%
+  filter(!is.na(prior_mental_illness)) %>% 
+  group_by(location_type) %>%
+  summarise(total_shootings = n(),
+            percent_mental_illness = mean(prior_mental_illness == "Yes") * 100)
+
+location_shootings_data
+
+location_illness <- location_shootings_data %>% 
+  ggplot(aes(x = reorder(location_type, -total_shootings), y = total_shootings)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(title = "Mass Shootings by Location Type",
+       subtitle = "The % Represent the Number of Shooters with Mental Illness",
+       x = "Location Type",
+       y = "Number of Shootings") +
+  geom_text(aes(label = sprintf("%d%%", round(percent_mental_illness), "%")),
+            vjust = -0.5, size = 3) +
+  theme_minimal()
+  
+location_illness 
+
+# There are specific locations where all the shootings have been caused by shooters with prior illnesses, which are Airport, Military or Religious places. The other locations which have many instances of shootings, such as the Workplace and Schools, have more of a mixed type of shooters, with shooters with prior mental illness remaining the main type of shooters.
 ```
 
 -   Assess the relationship between mental illness and total victims, mental illness and location type, and the intersection of all three variables.
 
 ```{r}
+# the relationship between mental illness and total victimes and the relationship between mentall illness were described in the code above
+# So I now look at the intersection of mentall illness, total victims, and location type by creating a heatmap
+# I first create the appropriate dataset to help my create the heatmap, and remove the Las Vegas Strip shooting in order to have a better scale to visualise my data
+illness_victim_location <- mass_shootings %>%
+  filter(total_victims <= 200) %>% 
+  group_by(prior_mental_illness, total_victims, location_type) %>%
+  summarise(count = n())
 
+i_v_l <- illness_victim_location %>% 
+  ggplot(aes(x = location_type, y = total_victims, fill = count)) +
+  geom_tile() +
+  labs(title = "Intersection of Mental Illness, Total Victims, and Location Type", x = "Location Type", y = "Total Victims") +
+  theme_minimal()
+
+i_v_l
 ```
 
 Make sure to provide a couple of sentences of written interpretation of your tables/figures. Graphs and tables alone will not be sufficient to answer this question.
@@ -380,7 +524,7 @@ There is a lot of explanatory text, comments, etc. You do not need these, so del
 
 # Details
 
--   Who did you collaborate with: TYPE NAMES HERE
+-   Who did you collaborate with: no one
 -   Approximately how much time did you spend on this problem set: ANSWER HERE
 -   What, if anything, gave you the most trouble: ANSWER HERE
 
